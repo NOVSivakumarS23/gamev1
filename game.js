@@ -1,7 +1,7 @@
 import main_loop from "./main_loop.js";
 import end_screen from "./end_screen.js";
 
-console.log("hi")
+console.log("i")
 var config = {
   height: 700,
   width: 1200,
