@@ -17,7 +17,7 @@ export default class spiky_ball {
   create(){
     this.circle = this.scene.physics.add.sprite(this.x, this.y).setCircle(20, -5, -5);
     this.scene.physics.add.existing(this.circle);
-    this.box = this.scene.physics.add.sprite(this.x, this.y, "spiky_ball")
+    this.box = this.physics.add.sprite(this.x, this.y, "spiky_ball")
     this.physics.add.collider(this.box, this.scene.lvl.solid_layer);
 
   }

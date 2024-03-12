@@ -4,6 +4,7 @@ import dialogue_system from "./dialogue_system.js";
 import level_loader from "./level_loader.js";
 
 const max_lvl = 0
+var rep = 0;
 //TODO: moving platforms, draw tilesets and spikes, add music, add snitch, 
 //kinda TODO: redraw spiky_ball sprite, bloom, 
 export default class main_loop extends Phaser.Scene {
@@ -15,43 +16,43 @@ export default class main_loop extends Phaser.Scene {
   constructor() {
     super("playGame");
   }
-  preload(){
-
+  preload() {
+    this.rep = rep
     this.keylogger = new Keylog(this);
     this.speech_bubble = new dialogue_system(this)
     this.player = new Player(this, this.physics, this.keylogger, this.speech_bubble);
     this.lvl = new level_loader(this, this.player, this.currentLevel)
     this.speech_bubble.preload();
     this.lvl.preload();
-    
+
   }
-  create(){
+  create() {
     this.keylogger.create();
-    this.player.create();
     this.lvl.create();
-    
-    this.player_body = this.player.player
-    
-    this.cameras.main.startFollow(this.player.player)
-    this.cameras.main.setBounds(0,0,(this.lvl.map.width*64),this.lvl.map.height*64, false);
-    
-    this.physics.add.collider(this.player_body, this.lvl.solid_layer);
-    
     this.lvl.create_collisions();
+
+    this.player_body = this.player.player
+
+    this.cameras.main.startFollow(this.player_body)
+    this.cameras.main.setBounds(0, 0, (this.lvl.map.width * 32), this.lvl.map.height * 32, false);
+
+    this.physics.add.collider(this.player_body, this.lvl.solid_layer);
     this.speech_bubble.create();
 
     this.physics.world.TILE_BIAS = 64;
-    
+
   }
-  update(){
+  update() {
     this.keylogger.update()
     this.lvl.update()
-    if(this.player.action=="DIE" && this.player.t>50){
+    if (this.player.action == "DIE" && this.player.t > 50) {
+      rep++
       this.scene.restart({ level: this.currentLevel })
-    }else if(this.player.action=="WIN" && this.player.t>50){
-      if(this.player.win > max_lvl){
+    } else if (this.player.action == "WIN" && this.player.t > 100) {
+      rep = 0
+      if (this.player.win > max_lvl) {
         this.scene.start("endgame")
-      }else{this.scene.restart({ level: this.player.win})}
+      } else { this.scene.restart({ level: this.player.win }) }
     }
     /*if(moving_ground==true){
       grounded = true
@@ -60,5 +61,5 @@ export default class main_loop extends Phaser.Scene {
     this.player.update()
     this.keylogger.late_update()
   }
-  
+
 }

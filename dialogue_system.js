@@ -2,7 +2,7 @@ export default class dialogue_system {
   constructor(scene) {
     this.scene = scene
     this.x = 200
-    this.speed = 0.5
+    this.speed = 0.4
     this.y = 1000
     this.speech = "hello testing testing"
     this.t = 0
@@ -13,12 +13,13 @@ export default class dialogue_system {
     this.indices = [[1], [2], [1,3], [4]]
     
     this.current_options = ["yes", "no"]
-    this.option_line = "---"
+    this.option_line = ""
     this.cursor = 0;
     this.scroll = true;
     this.max_char = 40
     this.size = "13px"
     this.line_no = 0
+    this.obj = null
   }
   preload() {
     this.scene.load.image('dialogue_box', 'ui_sprites/dialogue_box.png');
@@ -52,6 +53,7 @@ export default class dialogue_system {
     else if(x_input<0 && this.cursor==1){this.cursor = 0}
   }
   unpack_obj(dialogue_obj){
+    this.obj = dialogue_obj
     this.x = dialogue_obj.x
     this.y = dialogue_obj.y-dialogue_obj.h-50
     this.paragraph = dialogue_obj.properties[0].value.split(";")
@@ -124,6 +126,7 @@ export default class dialogue_system {
   }
   update(dialogue_obj) {
     if (this.hide == false) {
+      console.log("printing")
       this.speech_prompt.visible = false
       this.format_options()
       this.speech_box.visible = true
@@ -140,6 +143,7 @@ export default class dialogue_system {
     } else {
       this.speech_box.visible = false
       this.text.setText(" ")
+      this.obj = null
       if(dialogue_obj!=null){
         this.speech_prompt.visible = true
         this.speech_prompt.x = dialogue_obj.x-10

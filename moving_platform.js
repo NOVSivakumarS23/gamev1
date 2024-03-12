@@ -19,8 +19,12 @@ export default class moving_platform {
     this.ease = 5
   }
   create(){
-    this.platform = this.scene.physics.add.sprite(this.x, this.y).setImmovable(true)
-    this.platform.body.setSize(500,50,0,0)
+    if(this.sprite!="null"){
+      this.platform = this.scene.physics.add.sprite(this.x, this.y, this.sprite).setImmovable(true)
+    }else{
+      this.platform = this.scene.physics.add.sprite(this.x, this.y).setImmovable(true)
+      this.platform.body.setSize(500,50,0,0)
+    }
   }
   update(){
     if(this.action=="GO"){
@@ -39,7 +43,7 @@ export default class moving_platform {
     }
   }
   stall(){
-    this.platform.body.setVelocityY(this.ay*this.dir*(1/(this.count)))
+    this.platform.body.setVelocityY(0)
     this.platform.body.setVelocityX(0)
     if(this.count>=this.wait){
       this.action = "GO"

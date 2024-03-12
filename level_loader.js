@@ -1,9 +1,10 @@
 import sprite_loader from "./sprite_loader.js";
 import moving_platform from "./moving_platform.js";
-import spiky_ball from "./spiky_ball";
+import spiky_ball from "./spiky_ball.js";
 
 
 export default class level_loader {
+  
   constructor(scene, player, lvl){
     this.scene = scene
     this.player = player
@@ -14,19 +15,28 @@ export default class level_loader {
     this.portal_list = []
     this.moving_platform_list = []
     this.spiky_ball_list = []
+
+    //refract this
     this.sprite_sizes = {"wizzy":[100,100], "wizard":[100,135]}
     this.block_sizes = {"spring":[32,32]}
+
+    this.map_list = ["dark_lvl1"]
+    this.tileset_list = ["dark_tileset"]
   }
   preload(){
     this.sprite_loader.load_sprites();
   }
   
   create(){
-    this.map = this.scene.add.tilemap("test_map")
-    var tileset = this.map.addTilesetImage("test", "test_tileset")
-    this.background = this.map.createLayer("background", tileset)
-    this.solid_layer = this.map.createLayer('solids', tileset, 0, 0);
-    this.foreground = this.map.createLayer("foreground", tileset)
+    this.map = this.scene.add.tilemap(this.map_list[this.lvl]);
+    var tileset = this.map.addTilesetImage("tileset", this.tileset_list[this.lvl])
+    this.background1 = this.map.createLayer("background1", tileset)
+    this.background2 = this.map.createLayer("background2", tileset)
+    this.solid_layer = this.map.createLayer('solid', tileset, 0, 0);
+    this.scene.player.create();
+    this.foreground2 = this.map.createLayer("foreground2", tileset)
+    this.foreground1 = this.map.createLayer("foreground1", tileset)
+    //this.foreground = this.map.createLayer("foreground", tileset)
     this.sprite_loader.load_anims()
     this.solid_layer.setCollisionByExclusion(-1, true);
   }
@@ -38,10 +48,12 @@ export default class level_loader {
     this.create_portal_layer()
     this.create_moving_platforms()
     this.create_semisolids();
+    this.create_spiky_balls();
   }
 
   create_damage_layer(){
     this.damage_layer = this.map.getObjectLayer("damage_box")
+    if(this.damage_layer==null){return}
     this.damage_layer.objects.forEach(objData => {
       const { x = 0, y = 0, name, width = 0, height = 0 } = objData
       var s = this.scene.physics.add.staticSprite(x+16, y+16);
@@ -52,6 +64,7 @@ export default class level_loader {
   create_spring_layer(){
     this.springs = this.scene.physics.add.staticGroup();
     this.spring_layer = this.map.getObjectLayer("springs")
+    if(this.spring_layer==null){return}
     this.spring_layer.objects.forEach(objData => {
       const { x = 0, y = 0, name, width = 0, height = 0 } = objData
       var dir = objData.properties[0].value
@@ -74,6 +87,7 @@ export default class level_loader {
   } 
   create_dialogue_layer(){
     this.dialogue_layer = this.map.getObjectLayer("dialogue_box")
+    if(this.dialogue_layer==null){return}
     this.dialogue_layer.objects.forEach(objData => {
       const { x = 0, y = 0, name, width = 0, height = 0 } = objData
       var temp = JSON.parse(JSON.stringify(objData));
@@ -92,6 +106,7 @@ export default class level_loader {
   create_crumbly_layer(){
     this.crumbly = this.scene.physics.add.staticGroup();
     this.crumbly_layer = this.map.getObjectLayer("crumbly")
+    if(this.crumbly_layer==null){return}
     this.crumbly_layer.objects.forEach(objData => {
       const {x=0, y=0, name, width = 0, height = 0} = objData
       this.crumbly.create(x+16, y+16-this.sprite_loader.block_sizes.crumbly[1], 'crumbly');
@@ -100,7 +115,8 @@ export default class level_loader {
 
   }
   create_portal_layer(){
-    this.portal_layer = this.map.getObjectLayer("portal")
+    this.portal_layer = this.map.getObjectLayer("portals")
+    if(this.portal_layer==null){return}
     this.portal_layer.objects.forEach(objData => {
       const { x = 0, y = 0, name, width = 0, height = 0 } = objData
       this.portal_list.push(objData)
@@ -112,12 +128,13 @@ export default class level_loader {
   }
   create_moving_platforms(){
     this.moving_layer = this.map.getObjectLayer("moving_platforms")
+    if(this.moving_layer==null){return}
     this.moving_layer.objects.forEach(objData => {
       const {x = 0, y = 0, name, width = 0, height = 0} = objData
       var m = new moving_platform(this.scene, this.scene.physics, objData)
       m.create()
       this.moving_platform_list.push(m)
-      if(m.semisolid==true){
+      if(m.semisolid==false){
         this.scene.physics.add.collider(this.player, m.platform, null, this.check_moving_semisolid_collision, this);
       }else{
         this.scene.physics.add.collider(this.player, m.platform, null, this.check_moving_collision, this);
@@ -126,9 +143,11 @@ export default class level_loader {
   }
   create_semisolids(){
     this.semisolids = this.map.getObjectLayer("semisolid")
+    if(this.semisolids==null){return}
     this.semisolids.objects.forEach(objData => {
       const {x = 0, y = 0, name, width = 0, height = 0} = objData
       var sprite = objData.properties[0].value
+      console.log(sprite)
       if(sprite=="null"){
         var s = this.scene.physics.add.staticSprite(x+16, y+16);
         s.body.setSize(width, height, 0, 0);
@@ -141,9 +160,12 @@ export default class level_loader {
   }
   create_spiky_balls(){
     this.spiky_balls = this.map.getObjectLayer("spiky_ball")
+    if(this.spiky_balls==null){return}
+
     this.spiky_balls.objects.forEach(objData => {
       const {x=0, y=0, name, width = 0, height = 0} = objData
       var s = new spiky_ball(this.scene,objData.x, objData.y, this.scene.physics)
+      s.create()
       this.spiky_ball_list.push(s)
     })
       
@@ -227,6 +249,8 @@ export default class level_loader {
   update(){
     for(var i=0; i<this.moving_platform_list.length; i++){
       this.moving_platform_list[i].update()
+    }for(var i=0; i<this.spiky_ball_list.length; i++){
+      this.spiky_ball_list[i].update()
     }
   }
 }
